@@ -1,0 +1,27 @@
+groups:
+  - name: pipelinewatch
+    rules:
+      - alert: PipelineFailed
+        expr: increase(pipeline_failures_total[5m]) > 0
+        labels:
+          severity: warning
+        annotations:
+          summary: Pipeline {{ $labels.pipeline }} failed
+          description: Failures increased over the last 5 minutes (increase {{ printf "%.2f" $value }}).
+
+      - alert: DataStale
+        expr: (time() - pipeline_last_success_timestamp_seconds) > 86400
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: Pipeline {{ $labels.pipeline }} data is older than 24h
+          description: Last success was {{ printf "%.0f" $value }} seconds ago.
+
+      - alert: RunDurationHigh
+        expr: pipeline_last_run_duration_seconds > 30
+        labels:
+          severity: warning
+        annotations:
+          summary: Pipeline {{ $labels.pipeline }} run exceeded 30s
+          description: Last run duration is {{ printf "%.1f" $value }} seconds.

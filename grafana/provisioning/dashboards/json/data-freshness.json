@@ -1,0 +1,155 @@
+{
+  "uid": "data-freshness",
+  "title": "Data freshness",
+  "description": "SLO: a successful run at least every 24 hours. The red line is that budget.",
+  "tags": ["pipelinewatch", "freshness"],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "10s",
+  "graphTooltip": 1,
+  "time": { "from": "now-6h", "to": "now" },
+  "links": [
+    { "title": "Pipeline health", "type": "link", "url": "/d/pipeline-health", "icon": "dashboard", "keepTime": true },
+    { "title": "Failure rate", "type": "link", "url": "/d/failure-rate", "icon": "dashboard", "keepTime": true },
+    { "title": "Logs", "type": "link", "url": "/d/logs", "icon": "dashboard", "keepTime": true }
+  ],
+  "templating": { "list": [] },
+  "annotations": { "list": [] },
+  "panels": [
+    {
+      "id": 1,
+      "type": "gauge",
+      "title": "Age of last success",
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "refId": "A", "expr": "max(time() - pipeline_last_success_timestamp_seconds)", "legendFormat": "age" }],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "min": 0,
+          "max": 172800,
+          "noValue": "waiting",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "orange", "value": 21600 },
+              { "color": "red", "value": 86400 }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true,
+        "orientation": "auto"
+      }
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "Budget remaining",
+      "description": "Time left before the 24 hour freshness SLO.",
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "refId": "A", "expr": "86400 - max(time() - pipeline_last_success_timestamp_seconds)", "legendFormat": "remaining" }],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "noValue": "waiting",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "orange", "value": 0 },
+              { "color": "green", "value": 64800 }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "auto"
+      }
+    },
+    {
+      "id": 3,
+      "type": "stat",
+      "title": "Freshness SLO",
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "refId": "A", "expr": "(time() - pipeline_last_success_timestamp_seconds) < bool 86400", "legendFormat": "{{pipeline}}" }],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "waiting",
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": { "text": "stale", "color": "red", "index": 0 },
+                "1": { "text": "fresh", "color": "green", "index": 1 }
+              }
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "green", "value": 1 }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "value"
+      }
+    },
+    {
+      "id": 4,
+      "type": "timeseries",
+      "title": "Success age",
+      "description": "Orange is 6 hours. Red is the 24 hour SLO.",
+      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "refId": "A", "expr": "time() - pipeline_last_success_timestamp_seconds", "legendFormat": "{{pipeline}}" }],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 20,
+            "showPoints": "never",
+            "spanNulls": false,
+            "thresholdsStyle": { "mode": "line" }
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "orange", "value": 21600 },
+              { "color": "red", "value": 86400 }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true },
+        "tooltip": { "mode": "single", "sort": "none" }
+      }
+    }
+  ]
+}

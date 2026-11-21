@@ -1,0 +1,136 @@
+{
+  "uid": "logs",
+  "title": "Logs",
+  "description": "Stdout from the demo pipeline, shipped by Promtail into Loki.",
+  "tags": ["pipelinewatch", "logs"],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "10s",
+  "time": { "from": "now-1h", "to": "now" },
+  "links": [
+    { "title": "Pipeline health", "type": "link", "url": "/d/pipeline-health", "icon": "dashboard", "keepTime": true },
+    { "title": "Data freshness", "type": "link", "url": "/d/data-freshness", "icon": "dashboard", "keepTime": true },
+    { "title": "Failure rate", "type": "link", "url": "/d/failure-rate", "icon": "dashboard", "keepTime": true }
+  ],
+  "templating": { "list": [] },
+  "annotations": { "list": [] },
+  "panels": [
+    {
+      "id": 1,
+      "type": "stat",
+      "title": "Error lines, 5 minutes",
+      "gridPos": { "h": 5, "w": 8, "x": 0, "y": 0 },
+      "datasource": { "type": "loki", "uid": "loki" },
+      "targets": [{
+        "refId": "A",
+        "datasource": { "type": "loki", "uid": "loki" },
+        "expr": "sum(count_over_time({container=\"demo-pipeline\"} |= \"ERROR\" [5m]))",
+        "queryType": "range"
+      }],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "red", "value": 1 }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "auto"
+      }
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "Log lines, 5 minutes",
+      "gridPos": { "h": 5, "w": 8, "x": 8, "y": 0 },
+      "datasource": { "type": "loki", "uid": "loki" },
+      "targets": [{
+        "refId": "A",
+        "datasource": { "type": "loki", "uid": "loki" },
+        "expr": "sum(count_over_time({container=\"demo-pipeline\"} [5m]))",
+        "queryType": "range"
+      }],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "noValue": "0",
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "blue", "value": null }] }
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "auto"
+      }
+    },
+    {
+      "id": 3,
+      "type": "timeseries",
+      "title": "Errors per minute",
+      "gridPos": { "h": 5, "w": 8, "x": 16, "y": 0 },
+      "datasource": { "type": "loki", "uid": "loki" },
+      "targets": [{
+        "refId": "A",
+        "datasource": { "type": "loki", "uid": "loki" },
+        "expr": "sum(count_over_time({container=\"demo-pipeline\"} |= \"ERROR\" [1m]))",
+        "queryType": "range"
+      }],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "custom": {
+            "drawStyle": "bars",
+            "fillOpacity": 70,
+            "showPoints": "never"
+          },
+          "color": { "mode": "fixed", "fixedColor": "red" }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": { "displayMode": "hidden", "placement": "bottom", "showLegend": false },
+        "tooltip": { "mode": "single", "sort": "none" }
+      }
+    },
+    {
+      "id": 4,
+      "type": "logs",
+      "title": "Demo pipeline logs",
+      "gridPos": { "h": 16, "w": 24, "x": 0, "y": 5 },
+      "datasource": { "type": "loki", "uid": "loki" },
+      "targets": [{
+        "refId": "A",
+        "datasource": { "type": "loki", "uid": "loki" },
+        "expr": "{container=\"demo-pipeline\"}",
+        "queryType": "range"
+      }],
+      "options": {
+        "dedupStrategy": "none",
+        "enableLogDetails": true,
+        "prettifyLogMessage": false,
+        "showCommonLabels": false,
+        "showLabels": false,
+        "showTime": true,
+        "sortOrder": "Descending",
+        "wrapLogMessage": true
+      }
+    }
+  ]
+}

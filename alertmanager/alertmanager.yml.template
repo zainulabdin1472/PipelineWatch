@@ -1,0 +1,12 @@
+global:
+  resolve_timeout: 5m
+
+route:
+  receiver: __RECEIVER_NAME__
+  group_by: ["alertname", "pipeline"]
+  group_wait: 10s
+  group_interval: 1m
+  repeat_interval: 3h
+
+receivers:
+__RECEIVER_BLOCK__
